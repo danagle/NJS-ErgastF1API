@@ -4,6 +4,9 @@
 # Dev environment in Docker
 .devcontainer
 
+# Visual Studio Code
+.vscode
+
 # Logs
 logs
 *.log
