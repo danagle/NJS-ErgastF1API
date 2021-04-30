@@ -1,6 +1,9 @@
 # MacOS
 .DS_Store
 
+# Dev environment in Docker
+.devcontainer
+
 # Logs
 logs
 *.log
