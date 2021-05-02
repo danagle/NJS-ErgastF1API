@@ -5,6 +5,7 @@ const path = require("path");
 let MySQLConfiguration = require("../connection.js");
 
 const { createCircuitsSqlQuery } = require("../models/circuits-model");
+const { parseRequestParams } = require("./shared-functions.js");
 
 //Supported Function
 function formattedCircuits(row) {
@@ -27,14 +28,7 @@ function formattedCircuits(row) {
 
 // /drivers
 router.get("", (req, res) => {
-  let offset =
-    typeof req.query.offset != "undefined" ? parseInt(req.query.offset) : 0;
-  let limit =
-    typeof req.query.limit != "undefined"
-      ? parseInt(req.query.limit)
-      : MySQLConfiguration.defaultLimit();
-
-  //START
+  // Parse the request parameters
   let {
     circuit,
     constructor,
@@ -43,20 +37,14 @@ router.get("", (req, res) => {
     driverStandings,
     fastest,
     grid,
+    limit,
+    offset,
     result,
     round,
+    sql,
     status,
     year,
-  } = req.query;
-
-  // If the 'constructor' key isn't defined then the request object's constructor will be returned instead
-  if (typeof constructor == "function") {
-    constructor = null;
-  }
-
-  if (year == "current") {
-    year = new Date().getFullYear().toString();
-  }
+  } = parseRequestParams(req, MySQLConfiguration.defaultLimit());
 
   if (driverStandings || constructorStandings) {
     res
@@ -66,6 +54,7 @@ router.get("", (req, res) => {
     return;
   }
 
+  // Prepare the SQL query
   const params = {
     circuit,
     constructor,
@@ -78,10 +67,10 @@ router.get("", (req, res) => {
     year,
   };
 
-  sql = createCircuitsSqlQuery(params, offset, limit);
+  sqlQuery = createCircuitsSqlQuery(params, offset, limit);
 
   const conn = MySQLConfiguration.getMySQLConnection();
-  conn.query(sql, (err, rows, fields) => {
+  conn.query(sqlQuery, (err, rows, fields) => {
     if (err) {
       console.log(
         "Failed to query for " +
@@ -92,8 +81,8 @@ router.get("", (req, res) => {
       res.status(400).send({ error: err.sqlMessage, sql: err.sql }).end();
       return;
     }
-    if (req.query.sql == "true") {
-      res.status(200).send(sql).end();
+    if (sql == "true") {
+      res.status(200).send(sqlQuery).end();
       return;
     }
 
