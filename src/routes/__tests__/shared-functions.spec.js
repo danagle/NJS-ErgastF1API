@@ -30,6 +30,7 @@ describe("shared-functions.parseRequestParams", () => {
       "driverStandings",
       "fastest",
       "grid",
+      "laps",
       "limit",
       "offset",
       "result",
@@ -67,6 +68,7 @@ describe("shared-functions.parseRequestParams", () => {
     expect(result.driverStandings).toBeUndefined();
     expect(result.fastest).toBeUndefined();
     expect(result.grid).toBeUndefined();
+    expect(result.laps).toBeUndefined();
     expect(result.limit).toBeUndefined();
     expect(result.result).toBeUndefined();
     expect(result.round).toBeUndefined();
