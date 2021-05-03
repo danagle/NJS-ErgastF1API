@@ -17,7 +17,9 @@ function parseRequestParams(req, defaultLimit) {
       year,
     } = req.query;
 
-    // If the 'constructor' key isn't defined then the request object's constructor will be returned instead
+    // If the 'constructor' key isn't explicitly defined
+    // the request object's constructor will have been selected
+    // Need to reset 'constructor' to null in this case
     if (typeof constructor == "function") {
       constructor = null;
     }
