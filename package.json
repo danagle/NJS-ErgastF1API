@@ -13,8 +13,9 @@
     "verbose": true
   },
   "scripts": {
-    "test": "jest --watch",
-    "start": "node app.js"
+    "coverage": "./node_modules/jest/bin/jest.js  --coverage --coverageDirectory='coverage'",
+    "start": "node app.js",
+    "test": "jest --watch"
   },
   "author": "Davide Albiero",
   "license": "ISC",
