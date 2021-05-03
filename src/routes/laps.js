@@ -4,6 +4,7 @@ const path = require("path");
 
 let MySQLConfiguration = require("../connection.js");
 
+const { createLapsSqlQuery } = require("../models/laps-model");
 const { parseRequestParams } = require("./shared-functions.js");
 
 //Supported Function
@@ -66,22 +67,10 @@ function formattedTiming(rows, lap) {
 
 router.get("", (req, res) => {
   // Parse the request parameters
-  let {
-    circuit,
-    constructor,
-    constructorStandings,
-    driver,
-    driverStandings,
-    fastest,
-    grid,
-    limit,
-    offset,
-    result,
-    round,
-    sql,
-    status,
-    year,
-  } = parseRequestParams(req, MySQLConfiguration.defaultLimit());
+  let { driver, laps, limit, offset, round, sql, year } = parseRequestParams(
+    req,
+    MySQLConfiguration.defaultLimit()
+  );
 
   if (driverStandings || constructorStandings) {
     res
@@ -111,14 +100,15 @@ router.get("", (req, res) => {
     return;
   }
 
-  let sql = `SELECT races.year, races.round, races.name, DATE_FORMAT(races.date, '%Y-%m-%d') AS 'date', DATE_FORMAT(races.time, '%H:%i:%S') AS 'raceTime', races.url, 
-                circuits.*, drivers.driverRef, lapTimes.lap, lapTimes.position, lapTimes.time 
-                FROM lapTimes, races, circuits, drivers
-                WHERE races.circuitId=circuits.circuitId AND lapTimes.driverId=drivers.driverId AND lapTimes.raceId=races.raceId AND races.year='${year}' AND races.round='${round}'`;
+  // Prepare the SQL query
+  const params = {
+    driver,
+    laps,
+    round,
+    year,
+  };
 
-  if (driver) sql += ` AND drivers.driverRef='${driver}'`;
-  if (laps) sql += ` AND lapTimes.lap='${laps}'`;
-  sql += ` ORDER BY lapTimes.lap, lapTimes.position LIMIT ${offset}, ${limit}`;
+  const sqlQuery = createLapsSqlQuery(params, offset, limit);
 
   const conn = MySQLConfiguration.getMySQLConnection();
   conn.query(sql, (err, rows, fields) => {
